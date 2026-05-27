@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For You 💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:    #e8547a;
+      --blush:   #f7c5d0;
+      --cream:   #fff8f0;
+      --deep:    #1a0a10;
+      --gold:    #d4956a;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--deep);
+      font-family: 'Cormorant Garamond', serif;
+      cursor: none;
+    }
+
+    /* ── Custom cursor ── */
+    #cursor {
+      position: fixed; width: 18px; height: 18px;
+      border: 2px solid var(--rose);
+      border-radius: 50%; pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: transform .15s ease, background .2s;
+      z-index: 9999;
+    }
+    #cursor.clicking { background: var(--rose); transform: translate(-50%,-50%) scale(.7); }
+
+    /* ── Floating hearts background ── */
+    #hearts-bg {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .heart-particle {
+      position: absolute; bottom: -40px;
+      font-size: 1.4rem; opacity: 0;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg);   opacity: .7; }
+      100% { transform: translateY(-110vh) rotate(30deg); opacity: 0; }
+    }
+
+    /* ────────────────────────────────
+       SCREEN 1 — Click to start
+    ──────────────────────────────── */
+    #screen-click {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 60% 40%, #3d1020 0%, #1a0a10 70%);
+      transition: opacity .9s ease;
+    }
+    #screen-click .petals {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    .petal {
+      position: absolute; width: 10px; height: 14px;
+      background: var(--blush); border-radius: 50% 0 50% 0;
+      opacity: .18; animation: petalFall linear infinite;
+    }
+    @keyframes petalFall {
+      0%   { transform: translateY(-20px) rotate(0deg);   opacity: .25; }
+      100% { transform: translateY(105vh) rotate(180deg); opacity: 0; }
+    }
+
+    .click-ring {
+      width: 220px; height: 220px; border-radius: 50%;
+      border: 1.5px solid rgba(232,84,122,.3);
+      position: absolute;
+      animation: ringPulse 2.8s ease-out infinite;
+    }
+    .click-ring:nth-child(2) { animation-delay: .9s; }
+    .click-ring:nth-child(3) { animation-delay: 1.8s; }
+    @keyframes ringPulse {
+      0%   { transform: scale(1);   opacity: .6; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+
+    .click-icon {
+      font-size: 3rem; margin-bottom: 2rem;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+    @keyframes iconFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+
+    .click-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      color: var(--cream); font-weight: 400;
+      letter-spacing: .08em; text-align: center;
+      line-height: 1.5; margin-bottom: .6rem;
+    }
+    .click-sub {
+      font-size: clamp(.9rem, 2vw, 1.1rem);
+      color: var(--blush); opacity: .7;
+      letter-spacing: .2em; text-transform: uppercase;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:.7} 50%{opacity:.3} }
+
+    /* ────────────────────────────────
+       SCREEN 2 — Video
+    ──────────────────────────────── */
+    #screen-video {
+      position: fixed; inset: 0; z-index: 20;
+      display: none; align-items: center; justify-content: center;
+      background: #000;
+    }
+    #screen-video video {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+
+    /* ────────────────────────────────
+       MODAL — Forgive me?
+    ──────────────────────────────── */
+    #modal-overlay {
+      position: fixed; inset: 0; z-index: 30;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(26,10,16,.7); backdrop-filter: blur(8px);
+    }
+    #modal-box {
+      background: linear-gradient(145deg, #2a0d1a, #1a0a10);
+      border: 1px solid rgba(232,84,122,.25);
+      border-radius: 24px; padding: 3rem 2.5rem;
+      max-width: 440px; width: 90%; text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 60px rgba(232,84,122,.08);
+      animation: modalIn .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes modalIn {
+      from { transform: scale(.7) translateY(30px); opacity: 0; }
+      to   { transform: scale(1)  translateY(0);    opacity: 1; }
+    }
+    .modal-emoji { font-size: 3.2rem; display: block; margin-bottom: 1rem; }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--cream); margin-bottom: .5rem;
+    }
+    .modal-sub {
+      color: var(--blush); opacity: .7;
+      font-size: 1rem; margin-bottom: 2rem; font-style: italic;
+    }
+    .btn-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      padding: .85rem 2.2rem; border-radius: 50px; border: none;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; letter-spacing: .05em;
+      cursor: none; transition: transform .2s, box-shadow .2s;
+      font-weight: 600;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-yes {
+      background: linear-gradient(135deg, var(--rose), #c0395a);
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(232,84,122,.35);
+    }
+    .btn-yes:hover { box-shadow: 0 12px 40px rgba(232,84,122,.55); }
+    .btn-no {
+      background: transparent;
+      border: 1.5px solid rgba(247,197,208,.3);
+      color: var(--blush);
+    }
+    .btn-no:hover { border-color: var(--blush); }
+
+    /* ────────────────────────────────
+       SCREEN 3 — Response
+    ──────────────────────────────── */
+    #screen-response {
+      position: fixed; inset: 0; z-index: 40;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 2rem;
+    }
+    #screen-response.yes-bg {
+      background: radial-gradient(ellipse at 50% 50%, #3d1020 0%, #1a0a10 80%);
+    }
+    #screen-response.no-bg {
+      background: radial-gradient(ellipse at 50% 50%, #1a1500 0%, #0d0d00 80%);
+    }
+
+    .response-emoji { font-size: 5rem; margin-bottom: 1.5rem; display: block; animation: popIn .6s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes popIn { from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0)} }
+
+    .response-msg {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      color: var(--cream); line-height: 1.4;
+      animation: fadeUp .8s .2s both ease;
+    }
+    .response-sub {
+      margin-top: 1rem;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--blush); opacity: .75; font-style: italic;
+      animation: fadeUp .8s .4s both ease;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* confetti for yes */
+    .confetti-piece {
+      position: fixed; width: 10px; height: 10px;
+      top: -20px; border-radius: 2px;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Floating hearts -->
+<div id="hearts-bg"></div>
+
+<!-- ── Screen 1: Click ── -->
+<div id="screen-click">
+  <div class="petals" id="petals"></div>
+  <div class="click-ring"></div>
+  <div class="click-ring"></div>
+  <div class="click-ring"></div>
+  <div class="click-icon">🌹</div>
+  <h1 class="click-title">Something special<br>is waiting for you</h1>
+  <p class="click-sub">tap anywhere to open</p>
+</div>
+
+<!-- ── Screen 2: Video ── -->
+<div id="screen-video">
+  <!--
+    DROP YOUR VIDEO FILE into  static/uploads/apology.mp4
+    and the src below will load it automatically.
+    Or paste a direct video URL instead.
+  -->
+  <video id="apology-video" playsinline>
+    <source src="/static/uploads/Sorry i always Hurt you - Boy hurting Girl - Qoutes Poetry Motivational Sad status video.mp4" type="video/mp4"/>
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<!-- ── Modal: Forgive me? ── -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <span class="modal-emoji">🥺💕</span>
+    <h2 class="modal-title">Will you forgive me?</h2>
+    <p class="modal-sub">I'm really, truly, deeply sorry… 🌸</p>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="handleChoice('yes')">Yes 💖</button>
+      <button class="btn btn-no"  onclick="handleChoice('no')">No 😤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Screen 3: Response ── -->
+<div id="screen-response">
+  <span class="response-emoji" id="resp-emoji"></span>
+  <p class="response-msg"  id="resp-msg"></p>
+  <p class="response-sub"  id="resp-sub"></p>
+</div>
+
+<script>
+  /* ── Cursor ── */
+  const cur = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  document.addEventListener('mousedown', () => cur.classList.add('clicking'));
+  document.addEventListener('mouseup',   () => cur.classList.remove('clicking'));
+
+  /* ── Floating hearts ── */
+  const hBg = document.getElementById('hearts-bg');
+  const HEARTS = ['💕','💗','🌸','✨','💓','🌹'];
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart-particle';
+    h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+    h.style.cssText = `
+      left: ${Math.random()*100}%;
+      animation-duration: ${6 + Math.random()*8}s;
+      animation-delay: ${Math.random()*8}s;
+      font-size: ${0.9 + Math.random()*1.2}rem;
+    `;
+    hBg.appendChild(h);
+  }
+
+  /* ── Falling petals on screen 1 ── */
+  const petalsCont = document.getElementById('petals');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.cssText = `
+      left: ${Math.random()*100}%;
+      top: ${Math.random()*-30}%;
+      animation-duration: ${5 + Math.random()*7}s;
+      animation-delay: ${Math.random()*6}s;
+      transform: rotate(${Math.random()*360}deg);
+      width: ${8 + Math.random()*10}px;
+      height: ${12 + Math.random()*10}px;
+    `;
+    petalsCont.appendChild(p);
+  }
+
+  /* ── Screen 1 → Video ── */
+  const s1      = document.getElementById('screen-click');
+  const s2      = document.getElementById('screen-video');
+  const video   = document.getElementById('apology-video');
+  const modal   = document.getElementById('modal-overlay');
+  const s3      = document.getElementById('screen-response');
+
+  let started = false;
+  s1.addEventListener('click', () => {
+    if (started) return;
+    started = true;
+    s1.style.opacity = '0';
+    setTimeout(() => {
+      s1.style.display = 'none';
+      s2.style.display = 'flex';
+      video.play().catch(() => {});
+    }, 900);
+  });
+
+  /* ── Video ends → show modal ── */
+  video.addEventListener('ended', () => {
+    s2.style.display = 'none';
+    modal.style.display = 'flex';
+  });
+
+  /* ── Handle yes / no ── */
+  async function handleChoice(choice) {
+    modal.style.display = 'none';
+
+    /* tell the backend */
+    try {
+      await fetch('/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ choice })
+      });
+    } catch(e) { console.warn('Email send failed', e); }
+
+    /* show response screen */
+    const emoji = document.getElementById('resp-emoji');
+    const msg   = document.getElementById('resp-msg');
+    const sub   = document.getElementById('resp-sub');
+
+    if (choice === 'yes') {
+      s3.className = '';
+      s3.classList.add('yes-bg');
+      emoji.textContent = '💖✨';
+      msg.textContent   = 'I love you, my little angry bird 🐦';
+      sub.textContent   = 'Thank you for forgiving me… you mean everything to me 🌹';
+      spawnConfetti();
+    } else {
+      s3.className = '';
+      s3.classList.add('no-bg');
+      emoji.textContent = '🐦‍🔥😤';
+      msg.textContent   = "Don't be so angry, my little angry bird";
+      sub.textContent   = 'I still love you so much… always and forever 💕';
+    }
+
+    s3.style.display = 'flex';
+  }
+
+  /* ── Confetti for yes ── */
+  function spawnConfetti() {
+    const colors = ['#e8547a','#f7c5d0','#d4956a','#fff8f0','#ff85a1','#ffd6e0'];
+    for (let i = 0; i < 80; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.cssText = `
+          left: ${Math.random()*100}vw;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          width: ${6 + Math.random()*10}px;
+          height: ${6 + Math.random()*10}px;
+          border-radius: ${Math.random() > .5 ? '50%' : '2px'};
+          animation-duration: ${2 + Math.random()*2}s;
+          animation-delay: 0s;
+        `;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 4000);
+      }, i * 35);
+    }
+  }
+</script>
+</body>
+</html>
