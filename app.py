@@ -25,7 +25,11 @@ def send_email(choice: str):
     msg["To"]      = RECEIVER_EMAIL
     msg.attach(MIMEText(body, "plain"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
+    # port 587 instead of 465
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
 
