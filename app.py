@@ -4,13 +4,16 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-app = Flask(__name__)
+EMAIL    = "psulav679@gmail.com"
+PASSWORD = "tlbt zgcc qsfu vsux"
 
-# ── Email config ── put your Gmail + App Password here ──
-SENDER_EMAIL    = "psulav679@gmail.com"       # your Gmail
-SENDER_PASSWORD = "tlbt zgcc qsfu vsux"     # Gmail App Password (not your real password)
-RECEIVER_EMAIL  = "psulav679@gmail.com"       # where YOU receive the notification
-
+try:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        s.login(EMAIL, PASSWORD)
+        s.sendmail(EMAIL, EMAIL, "Subject: Test\n\nIt works!")
+        print("✅ Email sent! Check your inbox")
+except Exception as e:
+    print(f"❌ Error: {e}")
 
 def send_email(choice: str):
     subject = "💌 She Forgave You! 🎉" if choice == "yes" else "😤 She Said No... (Angry Bird Mode)"
