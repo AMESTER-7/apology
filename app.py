@@ -4,9 +4,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-SENDER_EMAIL    = os.environ.get("psulav679@gmail.com")
-SENDER_PASSWORD = os.environ.get("tlbt zgcc qsfu vsux")
-RECEIVER_EMAIL  = os.environ.get("psulav679@gmail.com")
+pp = Flask(__name__)
+
+SENDER_EMAIL    = "psulav679@gmail.com"
+SENDER_PASSWORD = "tlbt zgcc qsfu vsux"
+RECEIVER_EMAIL  = "psulav679@gmail.com"
 
 def send_email(choice: str):
     subject = "💌 She Forgave You! 🎉" if choice == "yes" else "😤 She Said No... (Angry Bird Mode)"
