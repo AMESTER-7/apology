@@ -4,31 +4,20 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-pp = Flask(__name__)
+app = Flask(__name__)
 
 SENDER_EMAIL    = "psulav679@gmail.com"
 SENDER_PASSWORD = "tlbt zgcc qsfu vsux"
 RECEIVER_EMAIL  = "psulav679@gmail.com"
 
+
 def send_email(choice: str):
     subject = "💌 She Forgave You! 🎉" if choice == "yes" else "😤 She Said No... (Angry Bird Mode)"
 
     if choice == "yes":
-        body = """
-        🎉 GREAT NEWS! 🎉
-
-        She clicked YES! She forgave you! 💕
-
-        Go give her a hug right now! 🥰
-        """
+        body = "🎉 She clicked YES! She forgave you! Go hug her! 🥰"
     else:
-        body = """
-        😬 Uh oh...
-
-        She clicked NO. Angry bird mode activated 🐦‍🔥
-
-        Maybe try flowers? Or more apologies? 😅
-        """
+        body = "😬 She clicked NO. Angry bird mode 🐦‍🔥"
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -36,7 +25,7 @@ def send_email(choice: str):
     msg["To"]      = RECEIVER_EMAIL
     msg.attach(MIMEText(body, "plain"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
 
@@ -59,8 +48,7 @@ def respond():
         return jsonify({"status": "ok"})
     except Exception as e:
         print(f"Email error: {e}")
-        # still return ok so the frontend works even if email fails
-        return jsonify({"status": "ok", "warning": str(e)})
+        return jsonify({"status": "ok"})
 
 
 if __name__ == "__main__":
