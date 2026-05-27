@@ -4,16 +4,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-EMAIL    = "psulav679@gmail.com"
-PASSWORD = "tlbt zgcc qsfu vsux"
-
-try:
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
-        s.login(EMAIL, PASSWORD)
-        s.sendmail(EMAIL, EMAIL, "Subject: Test\n\nIt works!")
-        print("✅ Email sent! Check your inbox")
-except Exception as e:
-    print(f"❌ Error: {e}")
+SENDER_EMAIL    = os.environ.get("psulav679@gmail.com")
+SENDER_PASSWORD = os.environ.get("tlbt zgcc qsfu vsux")
+RECEIVER_EMAIL  = os.environ.get("psulav679@gmail.com")
 
 def send_email(choice: str):
     subject = "💌 She Forgave You! 🎉" if choice == "yes" else "😤 She Said No... (Angry Bird Mode)"
